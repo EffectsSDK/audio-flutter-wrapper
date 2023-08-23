@@ -1,0 +1,1 @@
+enum ModelPreset { quality, speed }

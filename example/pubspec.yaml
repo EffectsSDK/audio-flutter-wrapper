@@ -1,0 +1,20 @@
+name: audio_effects_sdk_example
+description: Demonstrates how to use the audio_effects_sdk plugin.
+publish_to: 'none'
+
+environment:
+  sdk: '>=2.19.2 <3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_webrtc: ^0.9.34
+
+  audio_effects_sdk:
+    path: ../
+
+  cupertino_icons: ^1.0.2
+
+flutter:
+
+  uses-material-design: true
