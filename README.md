@@ -77,6 +77,9 @@ onReady -\> **Function**?
 The property holds a function that is called on SDK readiness.  
 Note: An instance can not get ready before `useStream` is called with the correct argument.
 
+onError -\> **Function**(**ErrorObject** *e*)?  
+Pass onError callback to ErrorBus. See [ErrorObject](#class-errorobject).  
+
 onUnableToProcessLive -\> **Function**?  
 The property holds a function that is called on SDK stopped processing because can not process audio stream fast enought.
 
@@ -100,16 +103,89 @@ Note: The stream that was returned by `getStream()` started providing media.
 getStream() -\> **MediaStream**  
 Returns a stream with applied effects.
 
-setPreset(**ModelPreset** preset) -\> **Future<void>**  
+setDenoisePower(**double** *power*) -\> **void**  
+Set denoise power in the runtime. Avilable only for balanced preset.
+
+setDroppedFramesThreshold(**int** *threshold*) -\> **void**  
+Set the acceptable delay in processing in milliseconds. This parameter is used to understand that SDK can handle audio in real-time.  
+This parameter doesn't take into account the initial audio chunk required by preset to start processing.  
+If there is the delay in frame processing higher than provided threshold - SDK will pass an error with **ErrorCode**.droppedFrames in onError callback.  
+If you get such error - this mean SDK can't handle audio in real-time on the current hardware, and you should stop the SDK.  
+Arguments:
+- **int** *threshold* - Acceptable delay in processing in milliseconds.
+
+setPreset(**ModelPreset** *preset*, {int? *sampleRate*}) -\> **Future**  
 Set preset. If models are not loaded then loads model asynchronously and use them when loaded.  
 During loading previous models are used.  
 Arguments:
-- **ModelPreset** *preset*  
-Default is speed.
+- **ModelPreset** *preset* -  Default is speed.
+- **int**? *sampleRate* - Default is 16000. *quality* and *speed* presets only support 16000. *balanced* preset supports 16000|32000|44100|48000.
 
 ### enum ModelPreset  
 Controls set of using models.
 
 Available values:  
 * quality
+* balanced
 * speed
+
+### class Config 
+
+apiUrl -\> **String**?  
+Custom url for sdk authentication, applicable for on-premises solutions.  
+
+sdkUrl -\> **String**?  
+Specifies the url to SDK folder in case when you host model files by yourself.  
+
+preset -\> **ModelPreset**?  
+
+sampleRate -\> **int**?  - see *setPreset* method for sampleRate limitations.  
+
+droppedFramesThresholdMs -\> **int**?  
+
+wasmPaths -\> **Map**\<**String**, **String**\>  
+Currently wasm files are loading from the same directory where SDK is placed, but custom urls also supported (for example you can load it from CDNs)
+
+```dart
+config.wasmPaths = {
+    'ort-wasm.wasm': 'url',
+    'ort-wasm-simd.wasm': 'url',
+    'ort-wasm-threaded.wasm': 'url'
+    'ort-wasm-simd-threaded.wasm': 'url' 
+};
+```
+
+### class ErrorObject  
+Holds a description of an Error, warning or info.  
+
+message -\> **String**  
+
+type -\> **ErrorType**  
+
+code -\> **ErrorCode**?  
+
+emitter -\> **ErrorEmitter**?  
+
+cause -\> **Object**?  
+
+### enum ErrorCode 
+
+Available values:  
+* droppedFrames - SDK is not able to process the aduio stream in realtime.
+
+### enum ErrorType 
+  
+Available values:
+* info
+* warning
+* error
+
+### enum ErrorEmitter 
+
+Available values:
+* atsvb
+* streamProcessor
+* mlInference
+* model
+* webWorklet
+* webWorker
