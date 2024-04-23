@@ -1,1 +1,1 @@
-enum ModelPreset { quality, speed }
+enum ModelPreset { quality, balanced, speed }

@@ -1,8 +1,8 @@
-import 'dart:collection';
-
 import 'audio_effects_sdk_enums.dart';
+import 'audio_effects_sdk_error.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as webrtc;
 
+import 'audio_effects_sdk_config.dart';
 import 'audio_effects_sdk_platform_interface.dart';
 
 class AudioEffectsSDK {
@@ -27,6 +27,10 @@ class AudioEffectsSDK {
     }
 
     AudioEffectsSDKPlatform.instance.setOnReadyCallback(_sdkContext, callback);
+  }
+
+  void config(Config config) {
+    AudioEffectsSDKPlatform.instance.config(_sdkContext, config);
   }
 
   void useStream(webrtc.MediaStream stream) {
@@ -54,9 +58,26 @@ class AudioEffectsSDK {
     AudioEffectsSDKPlatform.instance.stop(_sdkContext);
   }
 
-  Future<void> setPreset(ModelPreset preset) {
+  void setDenoisePower(double power) {
+    _throwIfNotReady("setDenoisePower()");
+    AudioEffectsSDKPlatform.instance.setDenoisePower(_sdkContext, power);
+  }
+
+  void setDroppedFramesThreshold(int threshold) {
+    _throwIfNotReady("setDroppedFramesThreshold()");
+    AudioEffectsSDKPlatform.instance.setDroppedFramesThreshold(
+      _sdkContext, 
+      threshold
+    );
+  }
+
+  Future<void> setPreset(ModelPreset preset, {int? sampleRate}) {
     _throwIfNotReady("setPreset()");
-    return AudioEffectsSDKPlatform.instance.setPreset(_sdkContext, preset);
+    return AudioEffectsSDKPlatform.instance.setPreset(_sdkContext, preset, sampleRate);
+  }
+
+  set onError(Function(ErrorObject e)? callback) {
+    AudioEffectsSDKPlatform.instance.setOnErrorCallback(_sdkContext, callback);
   }
 
   void _throwIfNotReady(String methodName) {

@@ -23,9 +23,9 @@ String getCustomerID() {
   const String result = String.fromEnvironment("CUSTOMER_ID");
   if (result.isEmpty) {
     throw Exception("CUSTOMER_ID is not provided!\n"
-        "Please, provide CUSTOMER_ID as an environment variable by using --dart-define=CUSTOMER_ID={Your_customer_id}.\n"
-        "Example 'flutter run --dart-define=CUSTOMER_ID=\$CUSTOMER_ID'\n"
-        "To receive a license, visit https://effectssdk.com/contacts/");
+      "Please, provide CUSTOMER_ID as an environment variable by using --dart-define=CUSTOMER_ID={Your_customer_id}.\n"
+      "Example 'flutter run --dart-define=CUSTOMER_ID=\$CUSTOMER_ID'\n"
+      "To receive a license, visit https://effectssdk.com/contacts/");
   }
 
   return result;
@@ -47,6 +47,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
   bool _sdkInializing = false;
   bool _unableToProcessLive = false;
   bool _switchingPreset = false;
+  String? _lastError;
 
   String? _currentDeviceID;
   MediaStream? _currentAudioStream;
@@ -70,6 +71,24 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
         });
       }
     };
+    _audioSDK.onError = (e) { 
+      if (e.type != ErrorType.error) {
+        return;
+      }
+
+      if (_sdkInializing) {
+        setState(() {
+          _sdkInializing = false;
+          _audioEnhancementEnabled = false;
+          _lastError = e.message;
+        });
+      }
+      else {
+        setState(() {
+          _lastError = e.message;
+        });
+      }
+    };
     switchDevice();
   }
 
@@ -86,11 +105,13 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
     _currentAudioStream = inputStream;
   }
 
-  void setupAudioEnhancementPipeline(MediaStream stream) {
+  void setupAudioEnhancementPipeline(MediaStream stream) async {
     setState(() {
+      _lastError = null;
       _sdkInializing = true;
       _unableToProcessLive = false;
     });
+
     _audioSDK.clear();
     _audioSDK.onReady = () {
       _audioSDK.run();
@@ -123,6 +144,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
 
   void disableEnhancement() {
     setState(() {
+      _lastError = null;
       _audioEnhancementEnabled = false;
       if (null != _currentAudioStream) {
         setAudioOutputStream(_currentAudioStream!);
@@ -185,6 +207,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
   void setPreset(ModelPreset preset) async {
     setState(() {
       _switchingPreset = true;
+      _lastError = null;
     });
 
     try {
@@ -196,6 +219,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
     } catch (e) {
       setState(() {
         _switchingPreset = false;
+        _lastError = e.toString();
       });
     }
   }
@@ -270,7 +294,8 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
           }).toList(),
         )
       ]),
-      makeTextButton("Switch Input", onPressed: onSwitchInputPressed)
+      makeTextButton("Switch Input", onPressed: onSwitchInputPressed),
+      Text((null != _lastError)? _lastError! : "", style: TextStyle(color: Colors.red))
     ]);
   }
 

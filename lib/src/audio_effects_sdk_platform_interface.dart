@@ -1,8 +1,10 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as webrtc;
 
+import 'audio_effects_sdk_config.dart';
 import 'audio_effects_sdk_method_channel.dart';
 import 'audio_effects_sdk_enums.dart';
+import 'audio_effects_sdk_error.dart';
 
 abstract class AudioEffectsSDKPlatform extends PlatformInterface {
   /// Constructs a AudioEffectsSDKPlatform.
@@ -38,6 +40,11 @@ abstract class AudioEffectsSDKPlatform extends PlatformInterface {
         'setOnUnableToProcessLiveCallback() has not been implemented.');
   }
 
+  void config(Object sdkContext, Config config) {
+    throw UnimplementedError(
+        'config() has not been implemented.');
+  }
+
   void useStream(Object sdkContext, webrtc.MediaStream stream) {
     throw UnimplementedError('useStream() has not been implemented.');
   }
@@ -58,8 +65,21 @@ abstract class AudioEffectsSDKPlatform extends PlatformInterface {
     throw UnimplementedError('stop() has not been implemented.');
   }
 
-  Future<void> setPreset(Object sdkContext, ModelPreset preset) {
+  void setDenoisePower(Object sdkContext, double power) {
+    throw UnimplementedError('setDenoisePower() has not been implemented.');
+  }
+
+  void setDroppedFramesThreshold(Object sdkContext, int threshold) {
+    throw UnimplementedError('setDroppedFramesThreshold() has not been implemented.');
+  }
+
+  Future<void> setPreset(Object sdkContext, ModelPreset preset, int? sampleRate) {
     throw UnimplementedError(
         'setSegmentationPreset() has not been implemented.');
+  }
+
+  void setOnErrorCallback(Object sdkContext, Function(ErrorObject e)? callback) {
+    throw UnimplementedError(
+        'setOnErrorCallback() has not been implemented.');
   }
 }

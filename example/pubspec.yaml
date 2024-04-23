@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_webrtc: ^0.9.34
+  flutter_webrtc: ^0.10.3
 
   audio_effects_sdk:
     path: ../
