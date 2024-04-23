@@ -49,6 +49,10 @@ class AudioEffectsSDK {
     _ready = false;
   }
 
+  void preload() {
+    AudioEffectsSDKPlatform.instance.preload(_sdkContext);
+  }
+
   void run() {
     _throwIfNotReady("run()");
     AudioEffectsSDKPlatform.instance.run(_sdkContext);

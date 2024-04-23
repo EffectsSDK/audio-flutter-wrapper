@@ -57,6 +57,10 @@ abstract class AudioEffectsSDKPlatform extends PlatformInterface {
     throw UnimplementedError('clear() has not been implemented.');
   }
 
+  void preload(Object sdkContext) {
+    throw UnimplementedError('preload() has not been implemented.');
+  }
+
   void run(Object sdkContext) {
     throw UnimplementedError('run() has not been implemented.');
   }

@@ -106,6 +106,11 @@ class AudioEffectsSDKWeb extends AudioEffectsSDKPlatform {
   }
 
   @override
+  void preload(Object sdkContext) {
+    _callJSMethod(sdkContext, "preload", []);
+  }
+
+  @override
   void run(Object sdkContext) {
     _callJSMethod(sdkContext, "run", []);
   }

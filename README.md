@@ -96,6 +96,11 @@ Disables enabled features and stops processing.
 
 **NOTE**: Don't use next methods until this instance is ready.
 
+preload() -\> **void**  
+Ability to preload all required resourses specified in config. This functionality make the initialization faster.  
+Should be started after all configs are passed to *config* method.
+Starts prealoading asynchronous.
+
 run()-\> **void**  
 Starts processing.  
 Note: The stream that was returned by `getStream()` started providing media.  
