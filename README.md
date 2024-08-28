@@ -19,7 +19,7 @@ To receive an **Effects SDK** license, please fill out the contact form on [effe
 ## Features
 
 - AI Denoise - **implemented**
-- Echo Cancellation - **implemented**
+- Echo Cancellation - **in progress**
 - AI Denoise by Speaker Extraction - **in progress**
 
 ### How to add
