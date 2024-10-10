@@ -24,7 +24,7 @@ To receive an **Effects SDK** license, please fill out the contact form on [effe
 
 ### How to add
 
-Add `<script crossorigin="anonymous" src="https://effectssdk.ai/sdk/audio/dev/2.1.6/atsvb-web.js"></script>` to your index.html.
+Add `<script crossorigin="anonymous" src="https://effectssdk.ai/sdk/audio/dev/2.3.2/atsvb-web.js"></script>` to your index.html.
 
 Add next code as dependency in your pubspec.yaml file.
 ```yaml

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:html';
+import 'dart:html' as html;
 
 import 'package:audio_effects_sdk/audio_effects_sdk.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -31,6 +31,25 @@ String getCustomerID() {
   return result;
 }
 
+enum PresetSetting {
+  speed16khz(preset: ModelPreset.speed, sampleRate: 16000, friendlyName: "Speed: 16kHz"),
+  balanced16khz(preset: ModelPreset.balanced, sampleRate: 16000, friendlyName: "Balanced: 16kHz"),
+  balanced32khz(preset: ModelPreset.balanced, sampleRate: 32000, friendlyName: "Balanced: 32kHz"),
+  balanced44khz(preset: ModelPreset.balanced, sampleRate: 44100, friendlyName: "Balanced: 44.1kHz"),
+  balanced48khz(preset: ModelPreset.balanced, sampleRate: 48000, friendlyName: "Balanced: 48kHz"),
+  quality16khz(preset: ModelPreset.quality, sampleRate: 16000, friendlyName: "Quality: 16kHz");
+
+  const PresetSetting({
+    required this.preset,
+    required this.sampleRate,
+    required this.friendlyName
+  });
+
+  final ModelPreset preset;
+  final int sampleRate;
+  final String friendlyName;
+}
+
 class AudioEffectsSDKSampleApp extends StatefulWidget {
   const AudioEffectsSDKSampleApp({super.key});
 
@@ -40,16 +59,16 @@ class AudioEffectsSDKSampleApp extends StatefulWidget {
 }
 
 class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
-  final _audioOutput = AudioElement();
+  final _audioOutput = html.AudioElement();
   final _audioSDK = AudioEffectsSDK(getCustomerID());
   ModelPreset _currentPreset = ModelPreset.speed;
+  int _currentSampleRate = 16000;
   bool _audioEnhancementEnabled = false;
   bool _sdkInializing = false;
   bool _unableToProcessLive = false;
   bool _switchingPreset = false;
   String? _lastError;
 
-  String? _currentDeviceID;
   MediaStream? _currentAudioStream;
   MediaStream? _currentSdkOutput;
 
@@ -93,8 +112,11 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
   }
 
   Future<void> switchDevice([String? deviceID]) async {
-    MediaStream inputStream = await getAudioStream(deviceID);
+    final inputStream = await getAudioStream(_currentSampleRate, deviceID);
+    await setAudioStream(inputStream);
+  }
 
+  Future<void> setAudioStream(MediaStream inputStream) async {
     if (_audioEnhancementEnabled) {
       setupAudioEnhancementPipeline(inputStream);
     } else {
@@ -175,18 +197,22 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
     return result;
   }
 
-  Future<MediaStream> getAudioStream([String? deviceID]) async {
-    final constraints = getAudioConstraints(deviceID);
+  Future<MediaStream> getAudioStream(int sampleRate, [String? deviceID]) async {
+    final constraints = getAudioConstraints(sampleRate, deviceID);
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  Map<String, dynamic> getAudioConstraints([String? deviceID]) {
-    if (null != deviceID) {
-      return {
-        "audio": {"deviceId": deviceID}
-      };
-    }
-    return {"audio": true, "video": false};
+  Map<String, dynamic> getAudioConstraints(int sampleRate, [String? deviceID]) {
+    return {
+      "audio": {
+        if (null != deviceID) "deviceId": deviceID,
+        "autoGainControl": false,
+        "channelCount": 1,
+        "echoCancellation": false,
+        "noiseSuppression": false
+      },
+      "video": false
+    };
   }
 
   String get sdkStatusDesc {
@@ -204,17 +230,18 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
   bool get _presetSwitchAllowed =>
       _audioEnhancementEnabled && !_switchingPreset && !_sdkInializing;
 
-  void setPreset(ModelPreset preset) async {
+  void setPreset(PresetSetting setting) async {
     setState(() {
       _switchingPreset = true;
       _lastError = null;
     });
 
     try {
-      await _audioSDK.setPreset(preset);
+      await _audioSDK.setPreset(setting.preset, sampleRate: setting.sampleRate);
       setState(() {
-        _currentPreset = preset;
+        _currentPreset = setting.preset;
         _switchingPreset = false;
+        _currentSampleRate = setting.sampleRate;
       });
     } catch (e) {
       setState(() {
@@ -258,6 +285,10 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
               child: Text(title)));
     }
 
+    final currentPresetSetting = PresetSetting.values.firstWhere(
+      (s)=>s.preset == _currentPreset && s.sampleRate == _currentSampleRate
+    );
+
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Text(sdkStatusDesc, style: TextStyle(fontSize: 28)),
       if (_unableToProcessLive)
@@ -278,19 +309,19 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
       ]),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text("Model preset: ", style: TextStyle(fontSize: 16)),
-        DropdownButton<ModelPreset>(
-          value: _currentPreset,
+        DropdownButton<PresetSetting>(
+          value: currentPresetSetting,
           onChanged: _presetSwitchAllowed
-              ? (ModelPreset? preset) {
+              ? (PresetSetting? preset) {
                   if (null != preset) {
                     setPreset(preset);
                   }
                 }
               : null,
-          items: ModelPreset.values
-              .map<DropdownMenuItem<ModelPreset>>((ModelPreset value) {
-            return DropdownMenuItem<ModelPreset>(
-                value: value, child: Text(value.name));
+          items: PresetSetting.values
+              .map<DropdownMenuItem<PresetSetting>>((PresetSetting value) {
+            return DropdownMenuItem<PresetSetting>(
+                value: value, child: Text(value.friendlyName));
           }).toList(),
         )
       ]),
