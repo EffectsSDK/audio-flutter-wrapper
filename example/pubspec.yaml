@@ -3,12 +3,12 @@ description: Demonstrates how to use the audio_effects_sdk plugin.
 publish_to: 'none'
 
 environment:
-  sdk: '>=2.19.2 <3.7.0'
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_webrtc: ^0.10.3
+  flutter_webrtc: ^0.11.7
 
   audio_effects_sdk:
     path: ../
