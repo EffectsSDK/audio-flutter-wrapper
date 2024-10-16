@@ -174,6 +174,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
       _audioSDK.clear();
       stopTracks(_currentSdkOutput);
       _currentSdkOutput = null;
+      _sdkInializing = false;
     });
   }
 
@@ -227,8 +228,7 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
     return _sdkInializing ? "Initializing" : "Ready";
   }
 
-  bool get _presetSwitchAllowed =>
-      _audioEnhancementEnabled && !_switchingPreset && !_sdkInializing;
+  bool get _presetSwitchAllowed => !_switchingPreset && !_sdkInializing;
 
   void setPreset(PresetSetting setting) async {
     setState(() {
@@ -237,7 +237,12 @@ class _AudioEffectsSDKSampleAppState extends State<AudioEffectsSDKSampleApp> {
     });
 
     try {
-      await _audioSDK.setPreset(setting.preset, sampleRate: setting.sampleRate);
+      if (_audioSDK.isReady) {
+        await _audioSDK.setPreset(setting.preset, sampleRate: setting.sampleRate);
+      }
+      else {
+        _audioSDK.config(Config(preset: setting.preset, sampleRate: setting.sampleRate));
+      }
       setState(() {
         _currentPreset = setting.preset;
         _switchingPreset = false;
