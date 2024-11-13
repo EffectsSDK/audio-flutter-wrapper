@@ -47,7 +47,7 @@ class AudioEffectsSDKWeb extends AudioEffectsSDKPlatform {
   Object createContext(String customerID) {
     if (!jsutil.hasProperty(html.window, "atsvb")) {
       throw StateError('atsvb has not been loaded.'
-          ' Please, add <script crossorigin="anonymous" src="https://effectssdk.ai/sdk/audio/dev/2.3.3/atsvb-web.js"></script> to your index.html');
+          ' Please, add <script crossorigin="anonymous" src="https://effectssdk.ai/sdk/audio/dev/2.3.5/atsvb-web.js"></script> to your index.html');
     }
 
     final tsvb = jsutil.getProperty(html.window, "atsvb");
